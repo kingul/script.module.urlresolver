@@ -56,25 +56,18 @@ def add_plugin_dirs(dirs):
     else:
         PLUGIN_DIRS += dirs
 
-def __load_plugin_dir(dir):
-    sys.path.insert(0, dir)
-    for filename in os.listdir(dir):
-        if not filename.startswith('__') and filename.endswith('.py'):
-            mod_name = filename[:-3]
-            imp = __import__(mod_name, globals(), locals())
-            sys.modules[mod_name] = imp
-            common.logger.log_debug('Loaded %s as %s from %s' % (imp, mod_name, filename))
-
 def load_external_plugins():
     for d in PLUGIN_DIRS:
         common.logger.log_debug('Adding plugin path: %s' % (d))
-        __load_plugin_dir(d)
+        sys.path.insert(0, d)
+        for filename in os.listdir(d):
+            if not filename.startswith('__') and filename.endswith('.py'):
+                mod_name = filename[:-3]
+                imp = __import__(mod_name, globals(), locals())
+                sys.modules[mod_name] = imp
+                common.logger.log_debug('Loaded %s as %s from %s' % (imp, mod_name, filename))
 
-def relevant_resolvers(domain=None, include_universal=None, include_external=False, include_disabled=False, include_xxx=False, order_matters=False):
-    xxx_plugins_path = 'special://home/addons/script.module.urlresolver.xxx/resources/plugins/'
-    if include_xxx and xbmcvfs.exists(xxx_plugins_path):
-        __load_plugin_dir(xbmc.translatePath(xxx_plugins_path))
-
+def relevant_resolvers(domain=None, include_universal=None, include_external=False, include_disabled=False, order_matters=False):
     if include_external:
         load_external_plugins()
     
@@ -98,7 +91,7 @@ def relevant_resolvers(domain=None, include_universal=None, include_external=Fal
     common.logger.log_debug('Relevant Resolvers: %s' % (relevant))
     return relevant
 
-def resolve(web_url, include_xxx=False):
+def resolve(web_url):
     '''
     Resolve a web page to a media stream.
 
@@ -128,7 +121,7 @@ def resolve(web_url, include_xxx=False):
         If the ``web_url`` could be resolved, a string containing the direct
         URL to the media file, if not, returns ``False``.
     '''
-    source = HostedMediaFile(url=web_url, include_xxx=include_xxx)
+    source = HostedMediaFile(url=web_url)
     return source.resolve()
 
 def filter_source_list(source_list):
@@ -192,7 +185,7 @@ def choose_source(sources):
         else:
             return False
 
-def scrape_supported(html, regex=None, host_only=False, include_xxx=False):
+def scrape_supported(html, regex=None, host_only=False):
     '''
     returns a list of links scraped from the html that are supported by urlresolver
     
@@ -219,9 +212,9 @@ def scrape_supported(html, regex=None, host_only=False, include_xxx=False):
                     links.append(stream_url)
                 continue
             else:
-                hmf = HostedMediaFile(host=host, media_id='dummy', include_xxx=include_xxx)  # use dummy media_id to allow host validation
+                hmf = HostedMediaFile(host=host, media_id='dummy')  # use dummy media_id to allow host validation
         else:
-            hmf = HostedMediaFile(url=stream_url, include_xxx=include_xxx)
+            hmf = HostedMediaFile(url=stream_url)
         
         is_valid = hmf.valid_url()
         host_cache[host] = is_valid
