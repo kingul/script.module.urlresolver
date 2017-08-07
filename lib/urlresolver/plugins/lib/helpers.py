@@ -75,7 +75,7 @@ def append_headers(headers):
 
 def get_packed_data(html):
     packed_data = ''
-    for match in re.finditer('(eval\s*\(function.*?)</script>', html, re.DOTALL):
+    for match in re.finditer('(eval\s*\(function.*?)</script>', html, re.DOTALL | re.I):
         try:
             js_data = jsunpack.unpack(match.group(1))
             js_data = js_data.replace('\\', '')
