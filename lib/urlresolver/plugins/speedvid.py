@@ -18,16 +18,38 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from lib import helpers
+import re
+from lib import helpers, jsunpack
+from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class SpeedVidResolver(UrlResolver):
     name = "SpeedVid"
     domains = ['speedvid.net']
-    pattern = '(?://|\.)(speedvid\.net)/(?:embed-)?([0-9a-zA-Z-]+)'
+    pattern = '(?://|\.)(speedvid\.net)/(?:embed-|p-)?([0-9a-zA-Z]+)'
+    
+    def __init__(self):
+        self.net = common.Net()
     
     def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id), patterns=['''file:["'](?P<url>(?!http://s13)[^"']+)''']).replace(' ', '%20')
+        web_url = self.get_url(host, media_id)
+        headers = {'User-Agent': common.RAND_UA}
+        html = self.net.http_GET(web_url, headers=headers).content
+        
+        if html:
+            try:
+                packed = helpers.get_packed_data(html)
+                packed = re.search("""(eval\s*\(function.*?\|location\|.*?\)\))""", packed).groups()[0]
+                packed = jsunpack.unpack(packed)
+                location_href = re.search("""document\.location\.href\s*=\s*["']([^"']+)""", packed).groups()[0]
+                location_href = 'http:%s' % location_href if location_href.startswith("//") else location_href
+                
+                return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s13)[^"']+)''']).replace(' ', '%20')
+                
+            except:
+                raise ResolverError('File not found')
+            
+        raise ResolverError('File not found')
         
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://www.{host}/embed-{media_id}.html')
