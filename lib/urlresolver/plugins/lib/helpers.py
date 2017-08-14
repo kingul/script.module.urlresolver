@@ -160,8 +160,8 @@ def scrape_sources(html, result_blacklist=None, scheme='http', patterns=None, ge
         try: source_list.sort(key=lambda x: int(re.sub("\D", "", x[0])), reverse=True)
         except: 
             common.logger.log_debug('Scrape sources sort failed |int(re.sub("\D", "", x[0])|')
-            try: source_list.sort(key=lambda x: re.sub("\W", "", x[0]))
-            except: common.logger.log_debug('Scrape sources sort failed |re.sub("\W", "", x[0])|')
+            try: source_list.sort(key=lambda x: re.sub("[^a-zA-Z]", "", x[0]))
+            except: common.logger.log_debug('Scrape sources sort failed |re.sub("[^a-zA-Z]", "", x[0])|')
 
     return source_list
 
