@@ -54,7 +54,7 @@ def get_media_url(url):
             html = net.http_GET(playvid_url, headers=headers).content
             html += helpers.get_packed_data(html)
         
-        sources = helpers.scrape_sources(html, patterns=['''["']?\s*(?:file|src)\s*["']?\s*[:=,]?\s*["'](?P<url>[^"']+)(?:[^}>\]]+)["']?\s*res\s*["']?\s*[:=]\s*["']?(?P<label>\d+)'''], result_blacklist=["trailer.mp4"], generic_patterns=False)
+        sources = helpers.scrape_sources(html, patterns=["""src:\s*["'](?P<url>[^"']+).+?res:\s*["']?(?P<label>\d+)"""], result_blacklist=["trailer.mp4"], generic_patterns=False)
         
         if sources: return helpers.pick_source(sources) + helpers.append_headers(headers)
         
