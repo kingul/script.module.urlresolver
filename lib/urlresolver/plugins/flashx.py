@@ -22,6 +22,8 @@ from urlresolver.resolver import UrlResolver, ResolverError  # @UnusedImport
 
 logger = common.log_utils.Logger.get_logger(__name__)
 logger.disable()
+FX_SOURCE = 'https://raw.githubusercontent.com/jsergio123/script.module.urlresolver/master/lib/urlresolver/plugins/fx_gmu.py'
+FX_PATH = os.path.join(common.plugins_path, 'fx_gmu.py')
 
 
 class FlashxResolver(UrlResolver):
@@ -34,6 +36,8 @@ class FlashxResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         try:
+            self._auto_update(FX_SOURCE, FX_PATH)
+            reload(fx_gmu)
             web_url = self.get_url(host, media_id)
             return fx_gmu.get_media_url(web_url)
         except Exception as e:
