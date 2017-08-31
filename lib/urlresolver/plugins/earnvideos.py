@@ -23,7 +23,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class EarnVideosResolver(UrlResolver):
     name = "earnvideos"
     domains = ["earnvideos.com"]
-    pattern = '(?://|\.)(earnvideos\.com)/embed/([a-zA-Z0-9\-]+)'
+    pattern = '(?://|\.)(earnvideos\.com)/(?:embed|thumb)/([a-zA-Z0-9\-]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -36,7 +36,7 @@ class EarnVideosResolver(UrlResolver):
         
         if html:
             url = re.search('''url:\s*["']([^"']+)''', html)
-            token = re.search('''<meta name=["']csrf-token["'] content\s*=\s*["']([^"']+)''', html)
+            token = re.search('''<meta name=["']csrf-token["'] content=["']([^"']+)''', html)
             if url and token:
                 url = web_url + url.group(1)
                 token = token.group(1)
@@ -44,7 +44,7 @@ class EarnVideosResolver(UrlResolver):
                 _html = self.net.http_POST(url, form_data={'type': 'directLink'}, headers=headers).content
                 if _html:
                     sources = helpers.scrape_sources(_html)
-                    if sources: return helpers.pick_source(sources) + helpers.append_headers({'User-Agent': common.RAND_UA})
+                    if sources: return helpers.pick_source(sources) + helpers.append_headers({'User-Agent': self.UA})
                     
         raise ResolverError('Unable to locate video')
 
