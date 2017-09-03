@@ -39,16 +39,16 @@ class SpeedVidResolver(UrlResolver):
         if html:
             try:
                 packed = helpers.get_packed_data(html)
-                i = 0 #just incase of infinite loop
+                i = 0 # just incase of infinite loop
                 while jsunpack.detect(packed) and i < 5:
                     i += 1
                     try: packed = jsunpack.unpack(packed)
                     except: break
                     
-                location_href = re.search("""document\.location\.href\s*=\s*["']([^"']+)""", packed).groups()[0]
+                location_href = re.search("""(?:window|document)\.location\.href\s*=\s*["']([^"']+)""", packed, re.I).groups()[0]
                 location_href = 'http:%s' % location_href if location_href.startswith("//") else location_href
                 
-                return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s13)[^"']+)''']).replace(' ', '%20')
+                return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s(?:13|57))[^"']+)''']).replace(' ', '%20')
                 
             except Exception as e:
                 raise ResolverError(e)
@@ -57,3 +57,4 @@ class SpeedVidResolver(UrlResolver):
         
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://www.{host}/embed-{media_id}.html')
+
