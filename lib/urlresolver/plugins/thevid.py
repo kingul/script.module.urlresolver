@@ -23,7 +23,7 @@ class TheVidResolver(UrlResolver):
     pattern = '(?://|\.)(thevid\.net)/(?:video|e|v)/([A-Za-z0-9]+)'
     
     def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id), patterns=['''vurl\w+="(?P<url>[^"]+)'''], result_blacklist=['rick', 'logger', 'iframe']).replace(' ', '%20')
+        return helpers.get_media_url(self.get_url(host, media_id), patterns=['''vur?l\w+\s*=\s*["'](?P<url>[^"']+)'''], result_blacklist=['rick', 'logger', 'iframe', 'r.mp4']).replace(' ', '%20')
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, template='http://{host}/e/{media_id}/')
