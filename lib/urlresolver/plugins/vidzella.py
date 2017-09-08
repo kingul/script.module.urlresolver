@@ -24,7 +24,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class VidZellaResolver(UrlResolver):
     name = "vidzella"
     domains = ['vidzella.me', 'dl.vidzella.me']
-    pattern = '(?://|\.)(vidzella.me)/(?:play/#|stream\.php\?stream=)([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(vidzella.me)/(?:play/?#|stream\.php\?stream=)([0-9a-zA-Z]+)'
     
     def get_media_url(self, host, media_id):
         return helpers.get_media_url(self.get_url(host, media_id), result_blacklist=['intro_black']).replace(' ', '%20')
