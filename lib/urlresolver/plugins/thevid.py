@@ -15,23 +15,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os, thevid_gmu
-from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 logger = common.log_utils.Logger.get_logger(__name__)
 logger.disable()
-FX_SOURCE = 'https://raw.githubusercontent.com/jsergio123/script.module.urlresolver/master/lib/urlresolver/plugins/thevid_gmu.py'
-FX_PATH = os.path.join(common.plugins_path, 'thevid_gmu.py')
+VID_SOURCE = 'https://raw.githubusercontent.com/jsergio123/script.module.urlresolver/master/lib/urlresolver/plugins/thevid_gmu.py'
+VID_PATH = os.path.join(common.plugins_path, 'thevid_gmu.py')
 
 class TheVidResolver(UrlResolver):
     name = "TheVid"
     domains = ["thevid.net"]
     pattern = '(?://|\.)(thevid\.net)/(?:video|e|v)/([A-Za-z0-9]+)'
     
+    def __init__(self):
+        self.net = common.Net()
+    
     def get_media_url(self, host, media_id):
         try:
-            self._auto_update(FX_SOURCE, FX_PATH)
+            self._auto_update(VID_SOURCE, VID_PATH)
             reload(thevid_gmu)
             web_url = self.get_url(host, media_id)
             return thevid_gmu.get_media_url(web_url)
