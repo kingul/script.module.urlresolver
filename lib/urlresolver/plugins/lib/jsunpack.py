@@ -28,6 +28,7 @@ Unpacker for Dean Edward's p.a.c.k.e.r
 """
 
 import re
+from urlresolver import common
 
 def detect(source):
     """Detects whether `source` is P.A.C.K.E.R. coded."""
@@ -40,7 +41,8 @@ def unpack(source):
     payload, symtab, radix, count = _filterargs(source)
 
     if count != len(symtab):
-        raise UnpackingError('Malformed p.a.c.k.e.r. symtab.')
+        common.logger.log('JSUNPACK | Malformed p.a.c.k.e.r. symtab.')
+        #raise UnpackingError('Malformed p.a.c.k.e.r. symtab.')
 
     try:
         unbase = Unbaser(radix)
