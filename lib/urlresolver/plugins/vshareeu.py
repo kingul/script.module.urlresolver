@@ -24,7 +24,7 @@ class VshareEuResolver(UrlResolver):
     pattern = '(?://|\.)(vshare\.eu)/(?:embed-|)?([0-9a-zA-Z/]+)'
 
     def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id), patterns=['''file\s*:\s*["'](?P<url>[^"']+)''']).replace(' ', '%20')
+        return helpers.get_media_url(self.get_url(host, media_id), patterns=['''config:\s*{file\s*:\s*["'](?P<url>[^"']+)'''], generic_patterns=False).replace(' ', '%20')
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)
