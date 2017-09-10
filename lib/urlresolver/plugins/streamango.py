@@ -19,7 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re, js2py
-from lib import helpers
+from lib import helpers, jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -39,19 +39,21 @@ class StreamangoResolver(UrlResolver):
         if html:
             source = re.search('''srces\.push\({type:"video/mp4",src:\s*((\w+)\(.+?\))''', html)
             if source:
-                packed = helpers.get_packed_data(html)
-                packed = re.sub('eval\s*\(.*\)', '', packed)
-                js = packed+";"+source.group(1)+";"
-                # I dont like this but we'll see how it goes
-                _source = js2py.eval_js(js.replace("window.%s" % source.group(2), source.group(2)))
-                
-                if _source:
-                    _source = "http:%s" % _source if _source.startswith("//") else _source
-                    headers.update({'Referer': web_url})
-                    return _source + helpers.append_headers(headers)
+                packed = re.search('(eval\s*\(function.*?)</script>', html, re.DOTALL | re.I)
+                if packed:
+                    packed = jsunpack.unpack(packed.group(1))
+                    packed = re.sub('eval\s*\(.*\)', '', packed.replace('\\', ''))
+                    js = packed + ";" + source.group(1) + ";"
+                    # I dont like this but we'll see how it goes
+                    try: _source = js2py.eval_js(js.replace("window.%s" % source.group(2), source.group(2)))
+                    except Exception as e: raise ResolverError(e)
+                    
+                    if _source:
+                        _source = "http:%s" % _source if _source.startswith("//") else _source
+                        headers.update({'Referer': web_url})
+                        return _source + helpers.append_headers(headers)
         
         raise ResolverError("Unable to locate video")
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://{host}/embed/{media_id}')
-
