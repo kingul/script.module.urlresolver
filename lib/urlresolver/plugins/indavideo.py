@@ -53,7 +53,7 @@ class IndavideoResolver(UrlResolver):
 
             tokens = data['data']['filesh']
 
-            sources = [(re.search('\.(\d+)\.mp4', i).group(1), i) for i in video_files]
+            sources = [(re.search('\.(\d+)\.mp4', i).group(1), i) for i in video_files if re.search('\.(\d+)\.mp4', i) != None]
             sources = [(i[0], i[1] + '&token=%s' % tokens[i[0]]) for i in sources]
             try: sources = list(set(sources))
             except: pass
