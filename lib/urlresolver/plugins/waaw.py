@@ -20,7 +20,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class WaawResolver(UrlResolver):
     name = "waaw"
     domains = ["waaw.tv", "hqq.watch", "netu.tv", "hqq.tv"]
-    pattern = "(?://|\.)((?:waaw|netu|hqq)\.(?:tv|watch))/watch_video\.php\?v=([a-zA-Z0-9]+)"
+    pattern = "(?://|\.)((?:waaw|netu|hqq)\.(?:tv|watch))/(?:watch_video\.php\?v|.+?vid)=([a-zA-Z0-9]+)"
 
     def __init__(self):
         self.net = common.Net()
