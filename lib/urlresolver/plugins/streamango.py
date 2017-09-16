@@ -1,9 +1,5 @@
 """
-    OVERALL CREDIT TO:
-        t0mm0, Eldorado, VOINAGE, BSTRDMKR, tknorris, smokdpi, TheHighway
-
-    urlresolver XBMC Addon
-    Copyright (C) 2011 t0mm0
+    urlresolver Kodi Addon
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-import re, js2py
+import re
 from lib import helpers, jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
@@ -45,7 +41,9 @@ class StreamangoResolver(UrlResolver):
                     packed = re.sub('eval\s*\(.*\)', '', packed.replace('\\', ''))
                     js = packed + ";" + source.group(1) + ";"
                     # I dont like this but we'll see how it goes
-                    try: _source = js2py.eval_js(js.replace("window.%s" % source.group(2), source.group(2)))
+                    try: 
+                        import js2py
+                        _source = js2py.eval_js(js.replace("window.%s" % source.group(2), source.group(2)))
                     except Exception as e: raise ResolverError(e)
                     
                     if _source:
