@@ -22,7 +22,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class StreamangoResolver(UrlResolver):
     name = "streamango"
     domains = ['streamango.com', "streamcherry.com"]
-    pattern = '(?://|\.)(stream(?:ango|cherry)\.com)/(?:f/|embed/)?([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(stream(?:ango|cherry)\.com)/(?:f|embed)/([0-9a-zA-Z]+)'
     
     def __init__(self):
         self.net = common.Net()
