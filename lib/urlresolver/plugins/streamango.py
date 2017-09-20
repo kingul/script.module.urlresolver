@@ -21,8 +21,8 @@ from urlresolver.resolver import UrlResolver, ResolverError
 
 class StreamangoResolver(UrlResolver):
     name = "streamango"
-    domains = ['streamango.com']
-    pattern = '(?://|\.)(streamango\.com)/(?:f/|embed/)?([0-9a-zA-Z]+)'
+    domains = ['streamango.com', "streamcherry.com"]
+    pattern = '(?://|\.)(stream(?:ango|cherry)\.com)/(?:f/|embed/)?([0-9a-zA-Z]+)'
     
     def __init__(self):
         self.net = common.Net()
@@ -37,7 +37,7 @@ class StreamangoResolver(UrlResolver):
             if source:
                 packed = re.search('(eval\s*\(function.*?)</script>', html, re.DOTALL | re.I)
                 if packed:
-                    packed = jsunpack.unpack(packed.group(1))
+                    packed = jsunpack.unpack(re.sub(r"([^_])(0x[a-zA-Z0-9]+)", lambda m : m.group(1)+str(int(m.group(2),16)), packed.group(1)))
                     packed = re.sub('eval\s*\(.*\)', '', packed.replace('\\', ''))
                     js = packed + ";" + source.group(1) + ";"
                     # I dont like this but we'll see how it goes
