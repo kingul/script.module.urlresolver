@@ -19,7 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re
-from lib import helpers, jsunpack
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -38,17 +38,13 @@ class SpeedVidResolver(UrlResolver):
         
         if html:
             try:
-                packed = helpers.get_packed_data(html)
-                i = 0 # just incase of infinite loop
-                while jsunpack.detect(packed) and i < 5:
-                    i += 1
-                    try: packed = jsunpack.unpack(packed)
-                    except: break
-                    
-                location_href = re.search("""(?:window|document)\.location\.href\s*=\s*["']([^"']+)""", packed, re.I).groups()[0]
-                location_href = 'http:%s' % location_href if location_href.startswith("//") else location_href
+                try: _html = re.findall('(eval\s*\(function.*?)</script>', html, re.DOTALL | re.I)[-1]
+                except: _html = html
+                packed = re.search("""\|href\|(\d+)\|html\|location\|(\d+)\|%s\|window\|([a-zA-Z]+)""" % media_id, _html)
+                if packed:
+                    location_href = "http://www.speedvid.net/%s-%s-%s-%s.html" % (packed.group(3), media_id, packed.group(1), packed.group(2))
                 
-                return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s(?:13|57))[^"']+)''']).replace(' ', '%20')
+                    return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s(?:13|57))[^"']+)''']).replace(' ', '%20')
                 
             except Exception as e:
                 raise ResolverError(e)
@@ -57,4 +53,3 @@ class SpeedVidResolver(UrlResolver):
         
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://www.{host}/embed-{media_id}.html')
-
