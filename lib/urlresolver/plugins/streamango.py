@@ -15,14 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re
-from lib import helpers, jsunpack
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class StreamangoResolver(UrlResolver):
     name = "streamango"
     domains = ['streamango.com', "streamcherry.com"]
-    pattern = '(?://|\.)(stream(?:ango|cherry)\.com)/(?:f|embed)/([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(stream(?:ango|cherry)\.com)/(?:v/d|f|embed)/([0-9a-zA-Z]+)'
     
     def __init__(self):
         self.net = common.Net()
@@ -33,25 +33,51 @@ class StreamangoResolver(UrlResolver):
         html = self.net.http_GET(web_url, headers=headers).content
         
         if html:
-            source = re.search('''srces\.push\({type:"video/mp4",src:\s*((\w+)\(.+?\))''', html)
-            if source:
-                packed = re.search('(eval\s*\(function.*?)</script>', html, re.DOTALL | re.I)
-                if packed:
-                    packed = jsunpack.unpack(re.sub(r"([^_])(0x[a-zA-Z0-9]+)", lambda m : m.group(1)+str(int(m.group(2),16)), packed.group(1)))
-                    packed = re.sub('eval\s*\(.*\)', '', packed.replace('\\', ''))
-                    js = packed + ";" + source.group(1) + ";"
-                    # I dont like this but we'll see how it goes
-                    try: 
-                        import js2py
-                        _source = js2py.eval_js(js.replace("window.%s" % source.group(2), source.group(2)))
-                    except Exception as e: raise ResolverError(e)
-                    
-                    if _source:
-                        _source = "http:%s" % _source if _source.startswith("//") else _source
-                        headers.update({'Referer': web_url})
-                        return _source + helpers.append_headers(headers)
+            encoded = re.search('''srces\.push\({type:"video/mp4",src:\w+\('([^']+)',(\d+)''', html)
+            if encoded:
+                source = self.decode(encoded.group(1), int(encoded.group(2)))
+                if source:
+                    source = "http:%s" % source if source.startswith("//") else source
+                    source = source.split("/")
+                    if not source[-1].isdigit():
+                      source[-1] = re.sub('[^\d]', '', source[-1])
+                    source = "/".join(source)
+                    headers.update({'Referer': web_url})
+                    return source + helpers.append_headers(headers)
         
         raise ResolverError("Unable to locate video")
+        
+    def decode(self, encoded, code):
+        _0x59b81a = ""
+        k = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+        k = k[::-1]
+
+        count = 0
+
+        for index in range(0, len(encoded) - 1):
+            while count <= len(encoded) - 1:
+                _0x4a2f3a = k.index(encoded[count])
+                count += 1
+                _0x29d5bf = k.index(encoded[count])
+                count += 1
+                _0x3b6833 = k.index(encoded[count])
+                count += 1
+                _0x426d70 = k.index(encoded[count])
+                count += 1
+
+                _0x2e4782 = ((_0x4a2f3a << 2) | (_0x29d5bf >> 4))
+                _0x2c0540 = (((_0x29d5bf & 15) << 4) | (_0x3b6833 >> 2))
+                _0x5a46ef = ((_0x3b6833 & 3) << 6) | _0x426d70
+                _0x2e4782 = _0x2e4782 ^ code
+
+                _0x59b81a = str(_0x59b81a) + chr(_0x2e4782)
+
+                if _0x3b6833 != 64:
+                    _0x59b81a = str(_0x59b81a) + chr(_0x2c0540)
+                if _0x3b6833 != 64:
+                    _0x59b81a = str(_0x59b81a) + chr(_0x5a46ef)
+
+        return _0x59b81a
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://{host}/embed/{media_id}')
