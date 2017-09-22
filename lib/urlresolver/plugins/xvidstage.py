@@ -47,4 +47,4 @@ class XvidstageResolver(UrlResolver):
         raise ResolverError('Unable to locate video')
 
     def get_url(self, host, media_id):
-        return 'http://www.xvidstage.com/%s' % media_id
+        return self._default_get_url(host, media_id, template='http://www.xvidstage.com/{media_id}')
