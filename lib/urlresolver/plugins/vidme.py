@@ -1,4 +1,4 @@
-'''
+"""
 thevideo urlresolver plugin
 Copyright (C) 2014 Eldorado
 This program is free software: you can redistribute it and/or modify
@@ -11,11 +11,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
 import re
 from lib import helpers
-from operator import itemgetter
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -29,14 +28,17 @@ class VidMeResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
+        headers = {'User-Agent': common.RAND_UA}
+        html = self.net.http_GET(web_url, headers=headers).content
 
-        #r = re.search('\<meta property.*og:video:url.*\s*content="([^"]+.mp4[^"]+)', html)
-        sources = re.findall('''source\s+src\s*=\s*['"]([^'"]+)['"].*?res\s*=\s*['"]([^'"]+)''', html)
-        if sources:
-            sources = [(b, a.replace('&amp;', '&')) for a, b in sources]
-            sources.sort(key=itemgetter(0), reverse=True)
-            return helpers.pick_source(sources)
+        if html:
+            sources = re.search('''data-sources\s*=\s*["']([^"']+)''', html)
+            if sources:
+                sources = sources.group(1).replace('&quot;', '"')
+                sources = helpers.scrape_sources(sources, patterns=['''"src":"(?P<url>[^"]+)","type":"application\\/x-mpegURL".+?"label":"(?P<label>[^"]+)'''], generic_patterns=False)
+                if sources:
+                    headers.update({"Referer": web_url})
+                    return helpers.pick_source(sources) + helpers.append_headers(headers)
 
         raise ResolverError('File Not Found or removed')
 
