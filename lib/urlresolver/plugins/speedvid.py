@@ -37,17 +37,10 @@ class SpeedVidResolver(UrlResolver):
         html = self.net.http_GET(web_url, headers=headers).content
         
         if html:
-            try:
-                try: _html = re.findall('(eval\s*\(function.*?)</script>', html, re.DOTALL | re.I)[-1]
-                except: _html = html
-                packed = re.search("""\|href\|(\d+)\|html\|location\|(\d+)\|%s\|window\|([a-zA-Z]+)""" % media_id, _html)
-                if packed:
-                    location_href = "http://www.speedvid.net/%s-%s-%s-%s.html" % (packed.group(3), media_id, packed.group(1), packed.group(2))
-                
-                    return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s(?:13|57))[^"']+)''']).replace(' ', '%20')
-                
-            except Exception as e:
-                raise ResolverError(e)
+            packed = re.search("""\|href\|(\d+)\|html\|location\|(\d+)\|%s\|window\|([a-zA-Z]+)""" % media_id, html)
+            if packed:
+                location_href = "http://www.speedvid.net/%s-%s-%s-%s.html" % (packed.group(3), media_id, packed.group(1), packed.group(2))
+                return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s(?:13|57))[^"']+)''']).replace(' ', '%20')
             
         raise ResolverError('File not found')
         
