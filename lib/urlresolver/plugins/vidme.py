@@ -34,11 +34,12 @@ class VidMeResolver(UrlResolver):
         if html:
             sources = re.search('''data-sources\s*=\s*["']([^"']+)''', html)
             if sources:
-                sources = sources.group(1).replace('&quot;', '"')
-                sources = helpers.scrape_sources(sources, patterns=['''"src":"(?P<url>[^"]+)","type":"application\\/x-mpegURL".+?"label":"(?P<label>[^"]+)'''], generic_patterns=False)
-                if sources:
+                sources = sources.group(1).replace('&quot;', '"').replace('\/', '/')
+                source = re.search('''"src":"([^"]+)","type":"application/x-mpegURL"''', sources)
+                if source:
                     headers.update({"Referer": web_url})
-                    return helpers.pick_source(sources) + helpers.append_headers(headers)
+                    source = source.group(1)
+                    return source + helpers.append_headers(headers)
 
         raise ResolverError('File Not Found or removed')
 
