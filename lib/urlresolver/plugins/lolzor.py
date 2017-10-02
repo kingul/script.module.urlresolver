@@ -24,9 +24,10 @@ from urlresolver.resolver import UrlResolver, ResolverError
 
 class LolzorResolver(UrlResolver):
     name = "lolzor"
-    domains = ["lolzor.com"]
-    pattern = '(?://|\.)(lolzor\.com)/(bach/embed/[0-9a-zA-Z]+)'
-    pattern2 = '(?://|\.)(lolzor\.com)/(video/(?:embed/)?\d+/[\w\-]+)'
+    domains = ["lolzor.com", "mycollection.net", "adhqmedia.com", "gagomatic.com", "funblr.com", "favour.me",
+               "vidbaba.com"]
+    pattern = '(?://|\.)((?:(?:lolzor|adhqmedia|gagomatic|funblr|vidbaba)\.com|mycollection\.net|favour\.me))/([^/]+/embed/(?:\d+/)?[0-9a-zA-Z\-]+)'
+    pattern2 = '(?://|\.)((?:(?:lolzor|adhqmedia|gagomatic|funblr|vidbaba)\.com|mycollection\.net|favour\.me))/(video/\d+/[0-9a-zA-Z\-]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -61,4 +62,5 @@ class LolzorResolver(UrlResolver):
             return any(host in domain.lower() for domain in self.domains)
 
     def get_url(self, host, media_id):
+        media_id = re.sub('video/(\d+)', r'video/embed/\1', media_id)
         return self._default_get_url(host, media_id, template='http://www.{host}/{media_id}')
