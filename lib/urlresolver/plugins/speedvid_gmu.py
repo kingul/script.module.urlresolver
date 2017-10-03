@@ -25,7 +25,7 @@ logger.disable()
 
 net = common.Net()
 
-def get_media_url(url):
+def get_media_url(url, media_id):
     headers = {'User-Agent': common.RAND_UA}
     html = net.http_GET(url, headers=headers).content
     
