@@ -25,9 +25,9 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class LolzorResolver(UrlResolver):
     name = "lolzor"
     domains = ["lolzor.com", "mycollection.net", "adhqmedia.com", "gagomatic.com", "funblr.com", "favour.me",
-               "vidbaba.com"]
-    pattern = '(?://|\.)((?:(?:lolzor|adhqmedia|gagomatic|funblr|vidbaba)\.com|mycollection\.net|favour\.me))/([^/]+/embed/(?:\d+/)?[0-9a-zA-Z\-]+)'
-    pattern2 = '(?://|\.)((?:(?:lolzor|adhqmedia|gagomatic|funblr|vidbaba)\.com|mycollection\.net|favour\.me))/(video/\d+/[0-9a-zA-Z\-]+)'
+               "vidbaba.com", "likeafool.com"]
+    pattern = '(?://|\.)((?:(?:lolzor|adhqmedia|gagomatic|funblr|vidbaba|likeafool)\.com|mycollection\.net|favour\.me))/([^/]+/embed/(?:\d+/)?[0-9a-zA-Z\-]+)'
+    pattern2 = '(?://|\.)((?:(?:lolzor|adhqmedia|gagomatic|funblr|vidbaba|likeafool)\.com|mycollection\.net|favour\.me))/(video/\d+/[0-9a-zA-Z\-]+)'
 
     def __init__(self):
         self.net = common.Net()
