@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 speedvid urlresolver plugin
 Copyright (C) 2015 tknorris
@@ -16,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
-from lib import helpers
+from lib import helpers, aa_decoder
 from urlresolver import common
 from urlresolver.resolver import ResolverError
 
@@ -30,10 +31,16 @@ def get_media_url(url, media_id):
     html = net.http_GET(url, headers=headers).content
     
     if html:
-        packed = re.search("""\|href\|(\d+)\|html\|location\|(\d+)\|%s\|window\|sd""" % media_id, html)
-        if packed:
-            location_href = "http://www.speedvid.net/sd-%s-%s-%s.html" % (media_id, packed.group(1), packed.group(2))
-        
-            return helpers.get_media_url(location_href, patterns=['''file:["'](?P<url>(?!http://s(?:13|57))[^"']+)''']).replace(' ', '%20')
+        html = html.encode('utf-8')
+        aa_text = re.search("""(ﾟωﾟﾉ= /｀ｍ´）ﾉ ~┻━┻   //\*´∇｀\*/ \['_'\]; o=\(ﾟｰﾟ\)  =_=3;.+?)</SCRIPT>""", html, re.I)
+        if aa_text:
+            try:
+                aa_decoded = aa_decoder.AADecoder(aa_text.group(1)).decode()
+                href = re.search("""href\s*=\s*['"]([^"']+)""", aa_decoded)
+                if href:
+                    location = "http://www.speedvid.net/%s" % href.group(1)
+                    return helpers.get_media_url(location, patterns=['''file:["'](?P<url>(?!http://s(?:13|57|51|35))[^"']+)''']).replace(' ', '%20')
+            except:
+                pass
         
     raise ResolverError('File not found')
