@@ -32,17 +32,22 @@ def get_media_url(url, media_id):
     
     if html:
         html = html.encode('utf-8')
-        aa_text = re.search("""(ﾟωﾟﾉ= /｀ｍ´）ﾉ ~┻━┻   //\*´∇｀\*/ \['_'\]; o=\(ﾟｰﾟ\)  =_=3;.+?)</SCRIPT>""", html, re.I)
+        aa_text = re.search("""(ﾟωﾟﾉ= /｀ｍ´）ﾉ ~┻━┻   //\*´∇｀\*/ \['_'\];\s*o=\(ﾟｰﾟ\)  =_=3;.+?)</SCRIPT>""", html, re.I)
         if aa_text:
             try:
-                aa_decoded = aa_decoder.AADecoder(aa_text.group(1).replace('((ﾟДﾟ))[ﾟoﾟ]+ ', '(ﾟДﾟ)[ﾟoﾟ]+ ')).decode()
+                aa_decoded = aa_decoder.AADecoder(re.sub('\(+ﾟДﾟ\)+\[ﾟoﾟ\]\)*\+\s*', '(ﾟДﾟ)[ﾟoﾟ]+ ', aa_text.group(1))).decode()
                 href = re.search("""href\s*=\s*['"]([^"']+)""", aa_decoded)
                 if href:
                     href = href.group(1)
                     if href.startswith("http"): location = href
                     elif href.startswith("//"): location = "http:%s" % href
                     else: location = "http://www.speedvid.net/%s" % href
-                    return helpers.get_media_url(location, patterns=['''file:["'](?P<url>(?!http://s(?:13|57|51|35))[^"']+)''']).replace(' ', '%20')
+                    headers.update({'Referer': url})
+                    _html = net.http_GET(location, headers=headers).content
+                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:13|57|51|35))[^"']+)'''])
+                    if sources:
+                        headers.update({'Referer': location})
+                        return helpers.pick_source(sources) + helpers.append_headers(headers)
             except:
                 pass
         
