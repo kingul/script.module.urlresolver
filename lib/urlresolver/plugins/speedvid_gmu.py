@@ -35,7 +35,7 @@ def get_media_url(url, media_id):
         aa_text = re.search("""(ﾟωﾟﾉ= /｀ｍ´）ﾉ ~┻━┻   //\*´∇｀\*/ \['_'\]; o=\(ﾟｰﾟ\)  =_=3;.+?)</SCRIPT>""", html, re.I)
         if aa_text:
             try:
-                aa_decoded = aa_decoder.AADecoder(aa_text.group(1)).decode()
+                aa_decoded = aa_decoder.AADecoder(aa_text.group(1).replace('((ﾟДﾟ))[ﾟoﾟ]+ ', '(ﾟДﾟ)[ﾟoﾟ]+ ')).decode()
                 href = re.search("""href\s*=\s*['"]([^"']+)""", aa_decoded)
                 if href:
                     location = "http://www.speedvid.net/%s" % href.group(1)
