@@ -38,7 +38,10 @@ def get_media_url(url, media_id):
                 aa_decoded = aa_decoder.AADecoder(aa_text.group(1).replace('((ﾟДﾟ))[ﾟoﾟ]+ ', '(ﾟДﾟ)[ﾟoﾟ]+ ')).decode()
                 href = re.search("""href\s*=\s*['"]([^"']+)""", aa_decoded)
                 if href:
-                    location = "http://www.speedvid.net/%s" % href.group(1)
+                    href = href.group(1)
+                    if href.startswith("http"): location = href
+                    elif href.startswith("//"): location = "http:%s" % href
+                    else: location = "http://www.speedvid.net/%s" % href
                     return helpers.get_media_url(location, patterns=['''file:["'](?P<url>(?!http://s(?:13|57|51|35))[^"']+)''']).replace(' ', '%20')
             except:
                 pass
