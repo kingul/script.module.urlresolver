@@ -30,7 +30,7 @@ class RapidgatorResolver(UrlResolver):
         self.api_base = '%s://rapidgator.net/api/' % (self.scheme)
         self._session_id = self.get_setting('session_id')
 
-    def _api_call(self, method, data, http='GET', login=True):
+    def api_call(self, method, data, http='GET', login=True):
         loop = 0
         while loop < 2:
             loop += 1
@@ -74,7 +74,7 @@ class RapidgatorResolver(UrlResolver):
         else:
             data = {'username': self.get_setting('username'), 'password': self.get_setting('password')}
             try:
-                response = self._api_call('user/login', data, http='POST', login=False)
+                response = self.api_call('user/login', data, http='POST', login=False)
                 self._session_id = response['session_id']
             except:
                 self._session_id = ''
@@ -83,7 +83,7 @@ class RapidgatorResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         data = {'url': self.get_url(media_id)}
-        response = self._api_call('file/download', data)
+        response = self.api_call('file/download', data)
         if 'delay' in response and response['delay'] and reponse['delay'] != '0':
             raise ResolverError(self.name + ' Payment Required')
         if 'url' not in response:
