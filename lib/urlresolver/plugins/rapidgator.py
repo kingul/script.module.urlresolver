@@ -39,11 +39,11 @@ class RapidgatorResolver(UrlResolver):
                 data.update({'sid': self._session_id})
 
             if http == 'GET':
-                content = self.net.http_GET(self.api_base + method + '?' + urllib.encode(data)).content
+                content = self.net.http_GET(self.api_base + method + '?' + urllib.urlencode(data)).content
             elif http == 'HEAD':
-                content = self.net.http_HEAD(self.api_base + method + '?' + urllib.encode(data)).content
+                content = self.net.http_HEAD(self.api_base + method + '?' + urllib.urlencode(data)).content
             elif http == 'POST':
-                content = self.net.http_POST(self.api_base + method, urllib.encode(data)).content
+                content = self.net.http_POST(self.api_base + method, urllib.urlencode(data)).content
             else:
                 raise ResolverError(self.name + ' Bad Request')
 
@@ -82,13 +82,13 @@ class RapidgatorResolver(UrlResolver):
         return True if self._session_id else False
 
     def get_media_url(self, host, media_id):
-        data = {'url': self.get_url(media_id)}
+        data = {'url': self.get_url(host, media_id)}
         response = self.api_call('file/download', data)
-        if 'delay' in response and response['delay'] and reponse['delay'] != '0':
+        if 'delay' in response and response['delay'] and response['delay'] != '0':
             raise ResolverError(self.name + ' Payment Required')
         if 'url' not in response:
             raise ResolverError(self.name + ' Bad Response')
-        return reponse['url'].replace('\\', '')
+        return response['url'].replace('\\', '')
 
     def get_url(self, host, media_id):
         return '%s://rapidgator.net/file/%s' % (self.scheme, media_id)
