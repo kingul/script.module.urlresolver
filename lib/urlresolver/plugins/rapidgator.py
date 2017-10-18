@@ -22,7 +22,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class RapidgatorResolver(UrlResolver):
     name = "Rapidgator"
     domains = ["rapidgator.net","rg.to"]
-    pattern = '(?://|\.)(rapidgator\.net|rg\.to)/file/([a-z0-9]+)(?=[/?#]|$)'
+    pattern = '(?://|\.)(rapidgator\.net|rg\.to)/+file/+([a-z0-9]+)(?=[/?#]|$)'
 
     def __init__(self):
         self.net = common.Net()
@@ -91,7 +91,9 @@ class RapidgatorResolver(UrlResolver):
         return response['url'].replace('\\', '')
 
     def get_url(self, host, media_id):
-        return '%s://rapidgator.net/file/%s' % (self.scheme, media_id)
+        if self.isUniversal():
+            return media_id
+        return '%s://%s/file/%s' % (self.scheme, host, media_id)
 
     @classmethod
     def get_settings_xml(cls):
@@ -101,4 +103,25 @@ class RapidgatorResolver(UrlResolver):
         xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
         xml.append('<setting id="%s_session_id" visible="false" type="text" default=""/>' % (cls.__name__))
         return xml
+
+    """ --- (PSEUDO)UNIVERSAL RESOLVER -- """
+
+    @classmethod
+    def isUniversal(self):
+        return True
+
+    def get_host_and_id(self, url):
+        return self.domains[0], url
+
+    def valid_url(self, url, host):
+        if url:
+            if re.search(self.pattern, url, flags=re.I) is not None:
+                return True
+        elif host:
+            host = host.lower()
+            if host.startswith('www.'):
+                host = host[4:]
+            if host in self.domains:
+                return True
+        return False
 
