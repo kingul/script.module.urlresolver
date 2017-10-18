@@ -20,7 +20,7 @@ msgstr ""
 
 msgctxt "#33000"
 msgid "OpenLoad Stream Authorization"
-msgstr "OpenLoad stream ovjera"
+msgstr "OpenLoad ovjera strujanja"
 
 msgctxt "#33001"
 msgid "To play this video, authorization is required"
