@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 speedvid urlresolver plugin
-Copyright (C) 2015 tknorris
+Copyright (C) 2017 jsergio
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,7 +32,10 @@ def get_media_url(url, media_id):
     
     if html:
         html = html.encode('utf-8')
-        aa_text = re.search("""(ﾟωﾟﾉ=\s*/｀ｍ´）ﾉ\s*~┻━┻\s*//\*´∇｀\*/\s*\['_'\];\s*o=\(ﾟｰﾟ\)\s*=_=3;.+?)</SCRIPT>""", html, re.I)
+        packed = helpers.get_packed_data(html)
+        ma = re.search("createCookie\('ma','([^']+)", packed)
+        if ma: headers.update({'Cookie': 'ma=%s;' % ma.group(1)})
+        aa_text = re.search("""(ﾟωﾟﾉ\s*=\s*/｀ｍ´）ﾉ\s*~┻━┻\s*//\*´∇｀\*/\s*\['_'\];\s*o\s*=\s*\(ﾟｰﾟ\)\s*=_=3;.+?)</SCRIPT>""", html, re.I)
         if aa_text:
             try:
                 aa_decoded = aa_decoder.AADecoder(re.sub('\(+ﾟДﾟ\)+\[ﾟoﾟ\]\)*\+\s*', '(ﾟДﾟ)[ﾟoﾟ]+ ', aa_text.group(1))).decode()
@@ -46,9 +49,11 @@ def get_media_url(url, media_id):
                     _html = net.http_GET(location, headers=headers).content
                     sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:13|35|51|57|58|59))[^"']+)'''])
                     if sources:
+                        if ma: del headers['Cookie']
                         headers.update({'Referer': location})
                         return helpers.pick_source(sources) + helpers.append_headers(headers)
             except:
                 pass
         
     raise ResolverError('File not found')
+
