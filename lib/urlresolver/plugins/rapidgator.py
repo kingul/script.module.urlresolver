@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import json, urllib
 from urlresolver import common
+from urlresolver.common import i18n
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class RapidgatorResolver(UrlResolver):
@@ -27,8 +28,15 @@ class RapidgatorResolver(UrlResolver):
     def __init__(self):
         self.net = common.Net()
         self.scheme = 'https'
-        self.api_base = '%s://rapidgator.net/api/' % (self.scheme)
+        self.api_base = '%s://rapidgator.net/api' % (self.scheme)
         self._session_id = self.get_setting('session_id')
+        if self._session_id != '' and self.get_setting('login') == 'false':
+            self._session_id = ''
+            self.set_setting('session_id', self._session_id)
+
+    @classmethod
+    def _is_enabled(cls):
+        return cls.get_setting('enabled') == 'true'
 
     def api_call(self, method, data, http='GET', login=True):
         loop = 0
@@ -68,13 +76,13 @@ class RapidgatorResolver(UrlResolver):
 
     def login(self):
         if self.get_setting('login') == 'false':
-            self._session_id = ''
+            return False
         elif not (self.get_setting('username') and self.get_setting('password')):
             raise ResolverError(self.name + ' Unauthorized')
         else:
             data = {'username': self.get_setting('username'), 'password': self.get_setting('password')}
             try:
-                response = self.api_call('user/login', data, http='POST', login=False)
+                response = self.api_call('/user/login', data, http='POST', login=False)
                 self._session_id = response['session_id']
             except:
                 self._session_id = ''
@@ -83,7 +91,7 @@ class RapidgatorResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         data = {'url': self.get_url(host, media_id)}
-        response = self.api_call('file/download', data)
+        response = self.api_call('/file/download', data)
         if 'delay' in response and response['delay'] and response['delay'] != '0':
             raise ResolverError(self.name + ' Payment Required')
         if 'url' not in response:
@@ -98,13 +106,13 @@ class RapidgatorResolver(UrlResolver):
     @classmethod
     def get_settings_xml(cls):
         xml = super(cls, cls).get_settings_xml(include_login=False)
-        xml.append('<setting id="%s_login" type="bool" label="login" default="true"/>' % (cls.__name__))
-        xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>' % (cls.__name__))
-        xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_login" type="bool" label="%s" default="true"/>' % (cls.__name__, i18n('login')))
+        xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="%s" default=""/>' % (cls.__name__, i18n('username')))
+        xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="%s" option="hidden" default=""/>' % (cls.__name__, i18n('password')))
         xml.append('<setting id="%s_session_id" visible="false" type="text" default=""/>' % (cls.__name__))
         return xml
 
-    """ --- (PSEUDO)UNIVERSAL RESOLVER -- """
+    """ --- (PSEUDO)UNIVERSAL RESOLVER --- """
 
     @classmethod
     def isUniversal(self):
