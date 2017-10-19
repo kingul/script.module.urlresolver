@@ -189,3 +189,7 @@ msgstr "Nema IP ovjere"
 msgctxt "#33042"
 msgid "Client ID"
 msgstr "ID klijenta"
+
+msgctxt "#33043"
+msgid "Vshare.eu Stream Authorization"
+msgstr "Vshare.eu ovjera strujanja"

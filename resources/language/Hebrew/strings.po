@@ -186,3 +186,7 @@ msgstr "אין הרשאת הזרמה"
 msgctxt "#33042"
 msgid "Client ID"
 msgstr "זיהוי לקוח"
+
+msgctxt "#33043"
+msgid "Vshare.eu Stream Authorization"
+msgstr "הרשאה להזרמה מ-Vshare.eu"
