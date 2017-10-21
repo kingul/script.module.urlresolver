@@ -46,35 +46,6 @@ class RapidgatorResolver(UrlResolver):
         self._session_id = ''
         self.set_setting('session_id', '')
 
-    def get_url(self, host, media_id):
-        return '%s://%s/file/%s' % (self.scheme, host, media_id)
-
-    def get_media_url(self, host, media_id):
-        if not (self.get_setting('premium') == 'true'):
-            raise ResolverError(self.name + ' premium account required')
-        data = {'url': self.get_url(host, media_id)}
-        response = self.api_call('/file/download', data)
-        if 'delay' in response and response['delay'] and response['delay'] != '0':
-            raise ResolverError(self.name + ' premium account expired')
-        if 'url' not in response:
-            raise ResolverError(self.name + ' Bad Response')
-        return response['url'].replace('\\', '')
-
-    def refresh_session(self):
-        if not (self.get_setting('login') == 'true'):
-            return False
-        username, password = self.get_setting('username'), self.get_setting('password')
-        if not (username and password):
-            raise ResolverError(self.name + ' username & password required')
-        data = {'username': username, 'password': password}
-        try:
-            response = self.api_call('/user/login', data, http='POST', session=False)
-            self._session_id = response['session_id']
-        except:
-            self._session_id = ''
-        self.set_setting('session_id', self._session_id)
-        return True if self._session_id else False
-
     def api_call(self, method, data, http='GET', session=True, refresh=True):
         loop = 0
         while loop < 2:
@@ -111,6 +82,35 @@ class RapidgatorResolver(UrlResolver):
                 continue
 
             raise ResolverError(self.name + ' HTTP ' + str(status) + ' Error')
+
+    def refresh_session(self):
+        if not (self.get_setting('login') == 'true'):
+            return False
+        username, password = self.get_setting('username'), self.get_setting('password')
+        if not (username and password):
+            raise ResolverError(self.name + ' username & password required')
+        data = {'username': username, 'password': password}
+        try:
+            response = self.api_call('/user/login', data, http='POST', session=False)
+            self._session_id = response['session_id']
+        except:
+            self._session_id = ''
+        self.set_setting('session_id', self._session_id)
+        return True if self._session_id else False
+
+    def get_media_url(self, host, media_id):
+        if not (self.get_setting('premium') == 'true'):
+            raise ResolverError(self.name + ' premium account required')
+        data = {'url': self.get_url(host, media_id)}
+        response = self.api_call('/file/download', data)
+        if 'delay' in response and response['delay'] and response['delay'] != '0':
+            raise ResolverError(self.name + ' premium account expired')
+        if 'url' not in response:
+            raise ResolverError(self.name + ' Bad Response')
+        return response['url'].replace('\\', '')
+
+    def get_url(self, host, media_id):
+        return '%s://%s/file/%s' % (self.scheme, host, media_id)
 
     @classmethod
     def get_settings_xml(cls):
