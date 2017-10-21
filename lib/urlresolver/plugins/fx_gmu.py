@@ -46,7 +46,7 @@ def get_media_url(url):
                 match = re.search('''!=\s*null.*?get\(['"]([^'"]+).*?\{([^:]+)''', js, re.DOTALL)
                 if match:
                     fx_url, fx_param = match.groups()
-                    fx_url = resolve_url(urlparse.urljoin('http://www.flashx.tv', fx_url) + '?' + urllib.urlencode({fx_param: 6}))
+                    fx_url = resolve_url(urlparse.urljoin('http://www.flashx.tv', fx_url) + '?' + urllib.urlencode({fx_param: "y"}) + '&' + urllib.urlencode({"fxfx": 6}))
                     common.logger.log('fxurl: %s' % (fx_url))
                     _html = net.http_GET(fx_url, headers=headers).content
                     
