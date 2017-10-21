@@ -37,8 +37,7 @@ class RapidgatorResolver(UrlResolver):
         self._session_id = ''
 
     def login(self):
-        login = (self.get_setting('login') == 'true')
-        if not login:
+        if not (self.get_setting('login') == 'true'):
             return False
         self._session_id = self.get_setting('session_id')
         return True
@@ -51,8 +50,7 @@ class RapidgatorResolver(UrlResolver):
         return '%s://%s/file/%s' % (self.scheme, host, media_id)
 
     def get_media_url(self, host, media_id):
-        premium = (self.get_setting('premium') == 'true')
-        if not premium:
+        if not (self.get_setting('premium') == 'true'):
             raise ResolverError(self.name + ' premium account required')
         data = {'url': self.get_url(host, media_id)}
         response = self.api_call('/file/download', data)
@@ -63,27 +61,26 @@ class RapidgatorResolver(UrlResolver):
         return response['url'].replace('\\', '')
 
     def refresh_session(self):
-        login = (self.get_setting('login') == 'true')
-        if not login:
+        if not (self.get_setting('login') == 'true'):
             return False
         username, password = self.get_setting('username'), self.get_setting('password')
         if not (username and password):
             raise ResolverError(self.name + ' username & password required')
         data = {'username': username, 'password': password}
         try:
-            response = self.api_call('/user/login', data, http='POST', login=False)
+            response = self.api_call('/user/login', data, http='POST', session=False)
             self._session_id = response['session_id']
         except:
             self._session_id = ''
         self.set_setting('session_id', self._session_id)
         return True if self._session_id else False
 
-    def api_call(self, method, data, http='GET', login=True, refresh=True):
+    def api_call(self, method, data, http='GET', session=True, refresh=True):
         loop = 0
         while loop < 2:
             loop += 1
 
-            if login:
+            if session:
                 data.update({'sid': self._session_id})
 
             try:
@@ -109,7 +106,7 @@ class RapidgatorResolver(UrlResolver):
             if status == 200:
                 return response
 
-            if login and refresh and status in [401,402]: # only actually seen 401, although 402 seems plausible
+            if session and refresh and status in [401,402]: # only actually seen 401, although 402 seems plausible
                 self.refresh_session()
                 continue
 
