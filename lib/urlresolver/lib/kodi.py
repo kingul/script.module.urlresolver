@@ -277,7 +277,7 @@ class CountdownDialog(object):
                 if result:
                     return result
                 
-             raise urlresolver.resolver.ResolverError('CountdownDialog Expired')
+            raise urlresolver.resolver.ResolverError('CountdownDialog Expired')
     
     def is_canceled(self):
         if self.pd is None:
