@@ -16,7 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import re
+import re, math, time
+from random import *
 from lib import helpers, aa_decoder
 from urlresolver import common
 from urlresolver.resolver import ResolverError
@@ -33,9 +34,7 @@ def get_media_url(url, media_id):
     if html:
         html = html.encode('utf-8')
         packed = helpers.get_packed_data(html)
-        ma = re.search("createCookie\('ma','([^']+)", packed)
-        if ma: headers.update({'Cookie': 'ma=%s;' % ma.group(1)})
-        aa_text = re.search("""(ﾟωﾟﾉ\s*=\s*/｀ｍ´）ﾉ\s*~┻━┻\s*//\*´∇｀\*/\s*\['_'\];\s*o\s*=\s*\(ﾟｰﾟ\)\s*=_=3;.+?)</SCRIPT>""", html, re.I)
+        aa_text = re.search("""(ﾟωﾟﾉ\s*=\s*/｀ｍ´\s*）ﾉ\s*~┻━┻\s*//\*´∇｀\*/\s*\['_'\]\s*;\s*o\s*=\s*\(ﾟｰﾟ\)\s*=_=3;.+?)</SCRIPT>""", html, re.I)
         if aa_text:
             try:
                 aa_decoded = aa_decoder.AADecoder(re.sub('\(+ﾟДﾟ\)+\[ﾟoﾟ\]\)*\+\s*', '(ﾟДﾟ)[ﾟoﾟ]+ ', aa_text.group(1))).decode()
@@ -45,15 +44,14 @@ def get_media_url(url, media_id):
                     if href.startswith("http"): location = href
                     elif href.startswith("//"): location = "http:%s" % href
                     else: location = "http://www.speedvid.net/%s" % href
-                    headers.update({'Referer': url})
+                    headers.update({'Referer': url, 'Cookie': str((int(math.floor((900-100)*random())+100))*(int(time.time()))*(128/8))})
                     _html = net.http_GET(location, headers=headers).content
-                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:13|35|51|57|58|59))[^"']+)'''])
+                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:13|28|35|51|57|58|59|89))[^"']+)'''])
                     if sources:
-                        if ma: del headers['Cookie']
+                        del headers['Cookie']
                         headers.update({'Referer': location})
                         return helpers.pick_source(sources) + helpers.append_headers(headers)
-            except:
-                pass
+            except Exception as e:
+                raise ResolverError(e)
         
     raise ResolverError('File not found')
-
