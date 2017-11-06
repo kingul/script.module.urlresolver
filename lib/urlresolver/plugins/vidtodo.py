@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re
-from lib import helpers, jsunpack
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -40,7 +40,6 @@ class VidToDoResolver(UrlResolver):
                 common.kodi.sleep(2000)
                 _html = self.net.http_POST(web_url, headers=headers, form_data=data).content
                 if _html:
-                    packed = jsunpack.unpack(_html)
                     sources = helpers.scrape_sources(_html)
                     if sources:
                         if len(sources) > 1:
