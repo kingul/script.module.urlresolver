@@ -45,7 +45,7 @@ def get_media_url(url, media_id):
                     else: location = "http://www.speedvid.net/%s" % href
                     headers.update({'Referer': url, 'Cookie': str((int(math.floor((900-100)*random())+100))*(int(time.time()))*(128/8))})
                     _html = net.http_GET(location, headers=headers).content
-                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:08|10|13|21|22|28|35|51|57|58|59|89))[^"']+)'''])
+                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?=http://s(?:02|06))[^"']+)'''])
                     if sources:
                         del headers['Cookie']
                         headers.update({'Referer': location})
