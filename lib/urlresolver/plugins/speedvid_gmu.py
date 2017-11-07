@@ -33,7 +33,6 @@ def get_media_url(url, media_id):
     
     if html:
         html = html.encode('utf-8')
-        packed = helpers.get_packed_data(html)
         aa_text = re.search("""(ﾟωﾟﾉ\s*=\s*/｀ｍ´\s*）ﾉ\s*~┻━┻\s*//\*´∇｀\*/\s*\[\s*'_'\s*\]\s*;\s*o\s*=\s*\(*ﾟｰﾟ\)*\s*=_=\(*3\)*\s*;.+?)</SCRIPT>""", html, re.I)
         if aa_text:
             try:
