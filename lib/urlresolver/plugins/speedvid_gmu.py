@@ -33,7 +33,7 @@ def get_media_url(url, media_id):
     
     if html:
         html = html.encode('utf-8')
-        aa_text = re.search("""(ﾟωﾟﾉ\s*=\s*/｀ｍ´\s*）ﾉ\s*~┻━┻\s*//\*´∇｀\*/\s*\[\s*'_'\s*\]\s*;\s*o\s*=\s*\(*ﾟｰﾟ\)*\s*=_=\(*3\)*\s*;.+?)</SCRIPT>""", html, re.I)
+        aa_text = re.search("""(ﾟωﾟﾉ\s*=\s*/｀ｍ´\s*）\s*ﾉ.+?)</SCRIPT>""", html, re.I)
         if aa_text:
             try:
                 aa_decoded = aa_decoder.AADecoder(re.sub('\(+ﾟДﾟ\)+\s*\[ﾟoﾟ\]\)*\s*\+(.+?)\(+ﾟДﾟ\s*\)+\[ﾟoﾟ\]\)+', r'(ﾟДﾟ)[ﾟoﾟ]+\1(ﾟДﾟ)[ﾟoﾟ])', aa_text.group(1))).decode()
@@ -45,7 +45,7 @@ def get_media_url(url, media_id):
                     else: location = "http://www.speedvid.net/%s" % href
                     headers.update({'Referer': url, 'Cookie': str((int(math.floor((900-100)*random())+100))*(int(time.time()))*(128/8))})
                     _html = net.http_GET(location, headers=headers).content
-                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:13|21|22|28|35|51|57|58|59|89))[^"']+)'''])
+                    sources = helpers.scrape_sources(_html, patterns=['''file:["'](?P<url>(?!http://s(?:08|10|13|21|22|28|35|51|57|58|59|89))[^"']+)'''])
                     if sources:
                         del headers['Cookie']
                         headers.update({'Referer': location})
